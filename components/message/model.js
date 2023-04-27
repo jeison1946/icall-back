@@ -19,5 +19,9 @@ const mySchema = new Schema({
   file: String
 });
 
+function ObjectId(id) {
+  return mongoose.Types.ObjectId(id);
+}
+
 const model = mongoose.model('Message', mySchema);
-module.exports = model;
+module.exports = {model, ObjectId};
