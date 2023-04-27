@@ -22,9 +22,6 @@ function addMessage(chat, user ,message, file) {
     }
     
     store.add(fullMessage);
-    fullMessage.user = {
-      _id: user
-    }
     socket.io.emit('message', fullMessage);
     resolve(fullMessage);
   });
