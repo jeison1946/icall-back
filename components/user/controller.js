@@ -1,18 +1,25 @@
 const store = require('./store');
 const validator = require('validator');
 
-function addUser(data) {
-  if(!data.name) {
-    return Promise.reject('Ivalid field name');
+function addUser(data, imageFile) {
+  const validate = validateModel(data);
+  if(validate.status) {
+    return Promise.reject(validate.message);
   }
 
-  if(!data.email || !validator.isEmail(data.email)) {
-    return Promise.reject('Ivalid field email');
+  let fileUrl = '';
+  if (imageFile) {
+    fileUrl = 'http://localhost:3000/app/files/' + imageFile.filename
+  }
+  else {
+    return Promise.reject('Ivalid field imageFile');
   }
 
   const user = {
     name: data.name,
-    email: data.email
+    email: data.email,
+    imageFile: fileUrl,
+    info: data.info ? data.info : 'Estoy usando iCall'
   }
   return store.add(user);
 }
@@ -43,6 +50,44 @@ function deleteUser(id)  {
     const result = await store.delete(id);
     resolve(result)
   });
+}
+
+function validateModel(data) {
+  var error = {
+    status: false,
+    message: ''
+  };
+  const fields = [
+    {
+      field: 'name',
+      type: 'string'
+    },
+    {
+      field: 'email',
+      type: 'email'
+    },
+  ];
+
+  try {
+    fields.forEach((item) => {
+      if(!data[item.field]) {
+        throw new Error('Ivalid field ' + item.field)
+      }
+      switch (item.type) {
+        case 'email':
+          if(!validator.isEmail(data.email)) {
+            throw new Error('Error de formato email invalido')
+          }
+        break;
+      }
+    });
+  } catch (e) {
+    error = {
+      status: true,
+      message: e.message
+    };
+  }
+  return error
 }
 
 module.exports = {

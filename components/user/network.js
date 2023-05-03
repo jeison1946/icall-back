@@ -1,7 +1,12 @@
 const express = require('express');
 const response =  require('../../network/response');
+const multer = require('multer');
 const router = express.Router();
 const controller = require('./controller');
+
+const upload = multer({
+  dest: 'public/files/'
+});
 
 router.get('/', function(req, res) {
   const filter = req.query || null;
@@ -14,13 +19,13 @@ router.get('/', function(req, res) {
     })
 });
 
-router.post('/', function(req, res) {
-  controller.addUser(req.body)
+router.post('/', upload.single('imageFile'), function(req, res) {
+  controller.addUser(req.body, req.file)
     .then((fullUser) => {
       response.success(req, res, fullUser, 201);
     })
     .catch(e => {
-      response.error(req, res, 'Información invalida', 400, 'Error en el controlador de usuario')
+      response.error(req, res, 'Información invalida', 400, e)
     })
 });
 
