@@ -1,5 +1,6 @@
 const express = require('express');
 const response =  require('../../network/response');
+const user = require('../../services/user/userService')
 const router = express.Router();
 const controller = require('./controller');
 
@@ -14,14 +15,28 @@ router.post('/', function(req, res) {
 });
 
 router.get('/', function(req, res) {
-  const filterUser = req.query.user || null;
-  controller.getChat(filterUser)
-    .then((chatList) => {
-      response.success(req, res, chatList);
-    })
-    .catch(e => {
-      response.error(req, res, 'Unexpected Error', 500, e);
-    })
+  user.validateUser(req, res).then((status) => {
+    if (status) {
+      const filterUser = req.query.user || null;
+    controller.getChat(filterUser)
+      .then((chatList) => {
+        response.success(req, res, chatList);
+      })
+      .catch(e => {
+        response.error(req, res, 'Unexpected Error', 500, e);
+      });
+    }
+  });
+  /* if(user.validateUser(req, res) instanceof Promise) {
+    const filterUser = req.query.user || null;
+    controller.getChat(filterUser)
+      .then((chatList) => {
+        response.success(req, res, chatList);
+      })
+      .catch(e => {
+        response.error(req, res, 'Unexpected Error', 500, e);
+      });
+    } */
 });
 
 module.exports = router;
